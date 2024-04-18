@@ -20,9 +20,6 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
-	"github.com/aliyun/aliyun-odps-go-sdk/odps/account"
-	"github.com/aliyun/aliyun-odps-go-sdk/odps/common"
-	"github.com/pkg/errors"
 	"io"
 	"log"
 	"net"
@@ -31,6 +28,10 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/aliyun/aliyun-odps-go-sdk/odps/account"
+	"github.com/aliyun/aliyun-odps-go-sdk/odps/common"
+	"github.com/pkg/errors"
 )
 
 // Todo 请求方法需要重构，加入header参数
@@ -252,13 +253,12 @@ func (client *RestClient) DoXmlWithParseFunc(
 	}
 
 	req, err := client.NewRequestWithUrlQuery(method, resource, bytes.NewReader(bodyXml), queryArgs)
+	if err != nil {
+		return errors.WithStack(err)
+	}
 	req.Header.Set(common.HttpHeaderContentType, common.XMLContentType)
 	for name, value := range headers {
 		req.Header.Set(name, value)
-	}
-
-	if err != nil {
-		return errors.WithStack(err)
 	}
 
 	return errors.WithStack(client.DoWithParseFunc(req, parseFunc))
